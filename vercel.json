@@ -1,0 +1,31 @@
+{
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "node build-vercel.mjs",
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/gesture-speak/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/speak",
+      "destination": "/api/vexo?route=speak"
+    },
+    {
+      "source": "/sentence",
+      "destination": "/api/vexo?route=sentence"
+    },
+    {
+      "source": "/listen-token",
+      "destination": "/api/vexo?route=listen-token"
+    },
+    {
+      "source": "/guess",
+      "destination": "/api/vexo?route=guess"
+    }
+  ]
+}

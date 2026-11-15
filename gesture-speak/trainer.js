@@ -3,6 +3,7 @@
 // recognising: every gesture is written down and spoken (ElevenLabs through this
 // project's own server at /speak; the browser's voice if that does not answer).
 // Built on the kit's gesture trainer (recogniser.js is the kit's, unchanged).
+import { cloudFetch } from './cloud.js';
 import { $, say, attempt, onConnect } from '../shared/page.js';
 import { Segmenter, GYRO_SCALE } from './recogniser.js';
 import { features, match, distance, rate, ShakeDetector, MIN_TURNS } from './rhythm.js';
@@ -71,7 +72,7 @@ let line = Promise.resolve();    // what is being said now; the next phrase wait
 
 function fetchSound(text) {
   if (!sounds.has(text)) {
-    sounds.set(text, fetch('/speak', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
+    sounds.set(text, cloudFetch('/speak', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
       .then((answer) => (answer.ok ? answer.blob() : null))
       .then((blob) => (blob ? URL.createObjectURL(blob) : null))
       .catch(() => null));
@@ -252,7 +253,7 @@ async function endSentence() {
   let text = phrases.join(' ');                  // one phrase, or no answer: said as it is
   if (phrases.length > 1) {
     try {
-      const answer = await fetch('/sentence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phrases }) });
+      const answer = await cloudFetch('/sentence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phrases }) });
       if (answer.ok) text = (await answer.json()).text || text;
     } catch { /* said as it is */ }
   }
@@ -494,7 +495,7 @@ async function askAI(picture) {
   light('#ffd60a', { pattern: 'breathe', period: 800 });
   let answer;
   try {
-    const reply = await fetch('/guess', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    const reply = await cloudFetch('/guess', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: picture, scene: scene()?.title ?? 'an everyday conversation' }) });
     if (reply.status === 503) {
       light(null);

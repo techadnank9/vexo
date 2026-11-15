@@ -3,3 +3,4 @@ vexo-open-kit
 .venv/
 __pycache__/
 .DS_Store
+/dist/

@@ -10,7 +10,7 @@ import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 3000
+PORT = int(sys.argv[1]) if __name__ == "__main__" and len(sys.argv) > 1 else 3000
 API = "https://api.elevenlabs.io/v1"
 MODELS = ("eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_multilingual_v2")
 MAX_TEXT = 200
@@ -131,12 +131,15 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
+    def post_allowed(self):
+        origin = self.headers.get("Origin", "")
+        return origin in ("http://localhost:%d" % PORT, "http://127.0.0.1:%d" % PORT)
+
     def do_POST(self):
         if self.path not in ("/speak", "/sentence", "/listen-token", "/guess"):
             return self.send_error(404)
         # Only this computer's own pages may ask: a web site open in another tab may not.
-        origin = self.headers.get("Origin", "")
-        if origin not in ("http://localhost:%d" % PORT, "http://127.0.0.1:%d" % PORT):
+        if not self.post_allowed():
             return self.send_error(403)
         if self.path == "/listen-token":
             return self.do_listen_token()

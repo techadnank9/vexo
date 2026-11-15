@@ -8,6 +8,8 @@
 // While captions are on, everything the band's microphone hears, from everyone near the
 // band, goes over the internet to Deepgram. The page says so the whole time.
 // Same settings as the kit's dashboard (vexo-open-kit/dashboard/speech/deepgram.js).
+import { cloudFetch } from './cloud.js';
+
 const ADDRESS = 'wss://api.deepgram.com/v1/listen?model=nova-3&language=en&encoding=opus&sample_rate=16000'
   + '&channels=1&interim_results=true&smart_format=true&endpointing=100&mip_opt_out=true';
 const KEEP_ALIVE_MS = 4000;      // Deepgram closes after 10 s without sound; it asks for a KeepAlive every 3 to 5 s
@@ -71,7 +73,7 @@ export function captions(on) {
       on.state('connecting');
       let token;
       try {
-        const answer = await fetch('/listen-token', { method: 'POST' });
+        const answer = await cloudFetch('/listen-token', { method: 'POST' });
         if (answer.status === 503) { wanted = false; return on.state('no-key'); }
         if (!answer.ok) throw new Error();
         token = (await answer.json()).token;
