@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+<title>How Silence works</title>
+<link rel="icon" href="../shared/icon.png">
+<link rel="stylesheet" href="how.css">
+</head>
+<body>
+<header>
+  <p class="back"><a href="./">Open the app</a></p>
+  <h1>A conversation for someone who cannot speak, and someone who can hear.</h1>
+  <p class="lede">Silence is one screen that sits between two people. One draws in the air and is heard out loud.
+  The other speaks and is read as text. Neither waits for the other to type.</p>
+</header>
+
+<main>
+<section>
+  <h2>One turn of the conversation</h2>
+  <p class="intro">Blue is the person who can hear. Pink is the person who cannot speak. Each step names what does the work.</p>
+  <ol class="turn">
+    <li class="them">
+      <h3>They speak</h3>
+      <p>The band's microphone hears the other person and streams the sound to <b>Deepgram</b>, which sends the words
+      back while they are still talking. They appear in large type on the blue side of the screen.</p>
+      <p class="by">Vexo band microphone, Deepgram live transcription</p>
+    </li>
+    <li class="me">
+      <h3>You draw your answer</h3>
+      <p>You make a fist in front of the laptop camera and draw in the air. Opening your hand ends the drawing.
+      <b>Google's MediaPipe</b> hand model follows your hand inside the page. The camera picture is never shown
+      and never leaves the laptop: only your lines are kept.</p>
+      <p class="by">Laptop camera, Google MediaPipe, running in the browser</p>
+    </li>
+    <li class="me">
+      <h3>The drawing becomes a sentence</h3>
+      <p>The line drawing and the last few lines of the conversation go to <b>OpenAI</b>. It answers with the one
+      sentence you most likely mean as a reply. A cup, after "What can I get you?", becomes "I would like a coffee,
+      please." If the drawing is unclear it answers nothing, and nothing is said.</p>
+      <p class="by">OpenAI, looking at the lines and the conversation</p>
+    </li>
+    <li class="me">
+      <h3>The sentence is spoken</h3>
+      <p><b>ElevenLabs</b> turns the sentence into a natural voice and the laptop plays it. The sentence also
+      joins the conversation on screen, so both people can read back what was said.</p>
+      <p class="by">ElevenLabs text to speech</p>
+    </li>
+    <li class="them">
+      <h3>They answer, and it goes round again</h3>
+      <p>While the page is speaking it stops listening, so it does not caption its own voice. Then the other
+      person's reply appears, and it becomes part of what the next drawing is understood against.</p>
+      <p class="by">The conversation so far is the context for every reply</p>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <h2>What each sponsor's technology does here</h2>
+  <div class="parts">
+    <article>
+      <h3>Vexo Open band</h3>
+      <p class="role">The wearable</p>
+      <p>Worn on the wrist of the person who cannot speak, and connected straight from the browser over Bluetooth.
+      Its microphone is the ear of the conversation. Its motion sensor feels the wrist, which keeps a line unbroken
+      when a fast hand blurs on camera, and reads a slow or fast shake as a quick yes or no. Its light shows
+      what the page is doing.</p>
+    </article>
+    <article>
+      <h3>Deepgram</h3>
+      <p class="role">Hearing</p>
+      <p>Live speech to text. The band sends 16 kHz Opus sound in 20 millisecond packets, and they are passed to
+      Deepgram's streaming model as they are, with nothing decoded on the way. Words come back as first guesses
+      and then as finished sentences.</p>
+    </article>
+    <article>
+      <h3>OpenAI</h3>
+      <p class="role">Meaning</p>
+      <p>Reads a rough air drawing together with the conversation and writes the sentence the person means, in
+      the first person. It is told to stay with what was drawn and what was said, and to stay silent when unsure.</p>
+    </article>
+    <article>
+      <h3>ElevenLabs</h3>
+      <p class="role">Voice</p>
+      <p>Speaks every sentence. A phrase is fetched once and kept, so saying it again is instant.</p>
+    </article>
+    <article>
+      <h3>Google MediaPipe</h3>
+      <p class="role">Seeing the hand</p>
+      <p>Finds 21 points on the hand in every camera frame, inside the browser. We measure the finger joints to
+      tell a closed fist, which draws, from an open hand, which stops.</p>
+    </article>
+  </div>
+</section>
+
+<section id="privacy">
+  <h2>What stays on the laptop, and what leaves it</h2>
+  <div class="split">
+    <div>
+      <h3>Stays</h3>
+      <ul>
+        <li>The camera picture. Only the lines you drew are ever used.</li>
+        <li>The band's motion data.</li>
+        <li>The keys for OpenAI and ElevenLabs. A small server on the laptop makes those calls, so the page never sees them.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Leaves</h3>
+      <ul>
+        <li>The other person's speech, to Deepgram, while captions are on. The band's light is solid blue the whole time.</li>
+        <li>Your line drawing and the recent conversation, to OpenAI.</li>
+        <li>The sentence to be spoken, to ElevenLabs.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>What it does not do</h2>
+  <ul class="limits">
+    <li>It is not a sign language translator. It reads air drawings, a few still hand shapes, and wrist shakes.</li>
+    <li>It needs an internet connection for hearing, meaning and voice.</li>
+    <li>The band talks to one screen at a time.</li>
+  </ul>
+</section>
+</main>
+
+<footer>
+  <p>Built at VexoHacks, an AI wearables hackathon, on 14 November 2026. <a href="https://github.com/techadnank9/vexo">Source code</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,51 @@
+/* The explainer page. Same three markers as the app: blue = the person who can hear,
+   pink = the person who cannot speak, yellow = look here. */
+:root {
+  color-scheme: light;
+  --ink: #101a3a; --paper: #edf0f7; --card: #ffffff; --line: #c9d0e3; --soft: #566087;
+  --them: #2742e0; --me: #e5446d; --mark: #ffd60a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 500 17px/1.55 "Avenir Next", ui-rounded, system-ui, sans-serif; color: var(--ink); background: var(--paper); }
+a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--them); }
+:focus-visible { outline: 3px solid var(--mark); outline-offset: 3px; border-radius: 4px; }
+
+header { background: var(--them); color: #fff; padding: clamp(28px, 5vw, 64px) clamp(20px, 6vw, 88px) clamp(36px, 6vw, 80px); }
+header a:hover { color: var(--mark); }
+.back { margin: 0 0 clamp(28px, 6vw, 72px); font-weight: 600; }
+h1 { margin: 0; max-width: 17ch; font-size: clamp(2.3rem, 6vw, 5rem); font-weight: 700; line-height: 1.04; letter-spacing: -0.025em; text-wrap: balance; }
+.lede { margin: 26px 0 0; max-width: 56ch; font-size: clamp(1.1rem, 1.6vw, 1.35rem); line-height: 1.45; color: rgb(255 255 255 / 0.9); }
+
+main { padding: 0 clamp(20px, 6vw, 88px); }
+section { padding: clamp(40px, 6vw, 80px) 0 0; }
+h2 { margin: 0 0 10px; font-size: clamp(1.6rem, 2.6vw, 2.3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+h3 { margin: 0 0 6px; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.01em; }
+p { margin: 0 0 10px; max-width: 68ch; }
+.intro { color: var(--soft); margin-bottom: 26px; }
+
+/* one turn: a real sequence, so it is numbered. Their steps sit left, yours sit right. */
+.turn { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; gap: 14px; }
+.turn li { counter-increment: step; position: relative; width: min(100%, 720px); padding: 22px 26px 18px 78px; border-radius: 22px; }
+.turn li::before { content: counter(step); position: absolute; left: 24px; top: 18px; font-size: 2.2rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+.turn li.them { background: var(--them); color: #fff; border-bottom-left-radius: 6px; }
+.turn li.me { margin-left: auto; background: var(--me); color: #fff; border-bottom-right-radius: 6px; }
+.turn p { max-width: none; }
+.turn .by { margin: 10px 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.85; }
+
+.parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 22px; }
+.parts article { padding: 22px 24px 18px; border-radius: 18px; background: var(--card); }
+.parts .role { margin: 0 0 10px; font-weight: 700; color: var(--them); }
+.parts p:last-child { margin: 0; color: var(--soft); }
+
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 22px; }
+.split > div { padding: 22px 24px; border-radius: 18px; background: var(--card); }
+.split > div:last-child { box-shadow: inset 0 6px 0 var(--mark); }
+ul { margin: 8px 0 0; padding-left: 1.15em; }
+li { margin: 0 0 8px; max-width: 62ch; }
+.limits { color: var(--soft); }
+
+footer { margin-top: clamp(48px, 7vw, 96px); padding: 28px clamp(20px, 6vw, 88px) 40px; background: var(--ink); color: rgb(255 255 255 / 0.85); }
+footer p { margin: 0; max-width: none; }
+footer a:hover { color: var(--mark); }
+@media (max-width: 640px) { .turn li { padding-left: 62px; } .turn li::before { left: 18px; } }

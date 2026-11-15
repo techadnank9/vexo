@@ -1,0 +1,152 @@
+/* The landing page. One typeface (Manrope), flat backgrounds, sizes from one type scale
+   and spacing from one set of steps (2 4 8 12 16 24 32 40 48 64 80 96). The app's own
+   colours appear only inside the picture of the app. */
+:root {
+  color-scheme: light;
+  --text: #0a0a0a; --muted: #5c5c5c; --line: #e4e4e4; --wash: #f5f5f5; --bg: #ffffff;
+  --blue: #2742e0; --pink: #e5446d; --ink: #101a3a;
+  --curve: cubic-bezier(0.22, 1, 0.36, 1);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+body { margin: 0; font-family: Manrope, system-ui, sans-serif; font-size: 16px; line-height: 24px; color: var(--text); background: var(--bg); }
+a { color: inherit; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+.skip { position: absolute; left: 16px; top: -64px; z-index: 60; padding: 8px 12px; border-radius: 8px; background: var(--text); color: #fff; font-weight: 600; transition: transform 500ms var(--curve); }
+.skip:focus { transform: translateY(80px); }
+
+/* ---- buttons */
+.button { display: inline-block; padding: 8px 12px; border-radius: 8px; background: var(--blue); color: #fff; font-size: 16px; line-height: 24px; font-weight: 600; text-decoration: none;
+  transition: transform 500ms var(--curve), opacity 300ms var(--curve); }
+.button.small { font-size: 14px; line-height: 20px; }
+.button:hover { transform: translateY(-2px); }
+.button:active { transform: scale(0.98); }
+
+/* ---- navigation: a compact bar floating off the top edge */
+.nav { position: fixed; top: 16px; left: 50%; z-index: 50; transform: translateX(-50%); display: flex; align-items: center; gap: 24px;
+  padding: 8px 8px 8px 16px; border: 1px solid var(--line); border-radius: 16px; background: rgb(255 255 255 / 0.72); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); white-space: nowrap; }
+.brand { font-size: 16px; line-height: 24px; font-weight: 700; text-decoration: none; }
+.links { display: flex; gap: 24px; }
+.links a { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--muted); text-decoration: none; transition: opacity 300ms var(--curve); }
+.links a:hover { color: var(--text); }
+.toggle { display: none; position: relative; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 8px; background: transparent; cursor: pointer; }
+.toggle span { position: absolute; left: 12px; right: 12px; height: 2px; border-radius: 2px; background: var(--text); transition: transform 500ms var(--curve); }
+.toggle span:first-child { top: 16px; }
+.toggle span:last-child { top: 22px; }
+.toggle[aria-expanded="true"] span:first-child { transform: translateY(3px) rotate(45deg); }
+.toggle[aria-expanded="true"] span:last-child { transform: translateY(-3px) rotate(-45deg); }
+
+/* ---- hero */
+.hero { padding: 160px 24px 96px; text-align: center; }
+.hero h1 { max-width: 680px; margin: 0 auto; font-size: 60px; line-height: 1; font-weight: 700; letter-spacing: -0.025em;
+  background: linear-gradient(90deg, #000000, #666666); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 8px; }
+.sub { max-width: 680px; margin: 24px auto 32px; font-size: 20px; line-height: 28px; color: var(--muted); }
+.proofline { margin-top: 16px; font-size: 14px; line-height: 20px; color: var(--muted); }
+
+/* the picture of the app: the one place the app's own colours are used */
+.demo { max-width: 880px; margin: 64px auto 0; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: #edf0f7; text-align: left;
+  opacity: 0; transform: translateY(32px); animation: rise 800ms var(--curve) 200ms forwards; }
+.demo-them { display: flex; align-items: center; gap: 12px; padding: 24px 32px; background: var(--blue); color: #fff; font-size: 36px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em; }
+.demo-them i { font-size: 30px; opacity: 0.8; }
+.demo-board { position: relative; margin: 16px 16px 0; border: 2px solid var(--ink); border-radius: 16px; background: #fff; }
+.demo-board svg { display: block; width: 100%; height: auto; }
+.demo-pen { position: absolute; top: 12px; left: 12px; padding: 4px 12px; border-radius: 9999px; background: var(--pink); color: #fff; font-size: 14px; line-height: 20px; font-weight: 600; }
+.demo-me { padding: 16px 32px 24px; color: var(--pink); text-align: right; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em;
+  opacity: 0; transform: translateY(24px); animation: rise 800ms var(--curve) 1100ms forwards; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+
+/* ---- the tagline: each word lights up as it is scrolled past */
+.tagline { padding: 96px 24px; }
+.tagline p { max-width: 680px; margin: 0 auto; font-size: 48px; line-height: 1; font-weight: 700; letter-spacing: -0.025em; text-align: center; }
+.tagline .word { opacity: 0.28; transition: opacity 500ms var(--curve); }
+.tagline .word.on { opacity: 1; }
+
+/* ---- sections */
+.block { max-width: 1104px; margin: 0 auto; padding: 96px 24px 0; }
+.block h2, .final h2 { font-size: 36px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em; }
+.block h3 { font-size: 20px; line-height: 28px; font-weight: 700; }
+.block p { color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; }
+.two h2 { font-size: 30px; line-height: 36px; }
+.two p { margin-top: 16px; font-size: 18px; line-height: 28px; }
+
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+.card { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); transition: transform 500ms var(--curve); }
+.card:hover { transform: translateY(-4px); }
+.card i { font-size: 32px; color: var(--blue); }
+.card h3 { margin-top: 16px; }
+.card p { margin-top: 8px; }
+
+.steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.steps li { position: relative; padding: 24px; border-radius: 16px; background: var(--wash); }
+.steps .num { position: absolute; top: 24px; right: 24px; font-size: 14px; line-height: 20px; font-weight: 700; color: var(--muted); }
+.steps i { font-size: 32px; color: var(--text); }
+.steps h3 { margin-top: 16px; }
+.steps p { margin-top: 8px; }
+
+.lead { max-width: 680px; margin-top: 16px; font-size: 18px; line-height: 28px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+.stat { padding: 24px; border: 1px solid var(--line); border-radius: 16px; }
+.stat b { display: block; font-size: 36px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.stat span { display: block; margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.made { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; font-weight: 600; }
+.made span { padding: 4px 12px; border: 1px solid var(--line); border-radius: 9999px; color: var(--text); }
+.honest { margin-top: 16px; font-size: 14px; line-height: 20px; }
+
+.faq { max-width: 680px; margin-top: 32px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.faq details + details { border-top: 1px solid var(--line); }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; font-size: 18px; line-height: 28px; font-weight: 600; cursor: pointer; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary i { flex: none; font-size: 20px; color: var(--muted); transition: transform 500ms var(--curve); }
+.faq details[open] summary i { transform: rotate(45deg); }
+.faq summary:hover { background: var(--wash); }
+.faq p { padding: 0 24px 24px; }
+
+.final { margin: 96px 24px 0; padding: 80px 24px; border-radius: 24px; background: var(--wash); text-align: center; }
+.final p { margin: 16px 0 32px; font-size: 18px; line-height: 28px; color: var(--muted); }
+
+footer { max-width: 1104px; margin: 0 auto; padding: 48px 24px 64px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: 14px; line-height: 20px; color: var(--muted); }
+footer p:last-child { display: flex; flex-wrap: wrap; gap: 24px; }
+footer a:hover { color: var(--text); }
+
+/* sections rise into place once, the first time they are seen */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity 700ms var(--curve), transform 700ms var(--curve); }
+.reveal.seen { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  .hero { padding: 128px 16px 64px; }
+  .hero h1 { font-size: 36px; line-height: 40px; }
+  .hero h1 br { display: none; }
+  .sub { font-size: 18px; line-height: 28px; }
+  .demo-them { padding: 16px; font-size: 24px; line-height: 32px; }
+  .demo-me { padding: 12px 16px 16px; font-size: 20px; line-height: 28px; }
+  .tagline { padding: 64px 16px; }
+  .tagline p { font-size: 36px; line-height: 40px; }
+  .block { padding: 64px 16px 0; }
+  .block h2, .final h2 { font-size: 30px; line-height: 36px; }
+  .two, .cards, .steps { grid-template-columns: 1fr; }
+  .two { gap: 32px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .final { margin: 64px 16px 0; padding: 48px 16px; }
+  .nav { left: 16px; right: 16px; transform: none; justify-content: space-between; gap: 8px; }
+  .nav .button.small { margin-left: auto; }
+  .toggle { display: block; }
+  /* the menu opens as a full height panel; its links arrive one after another */
+  .links { position: fixed; inset: -16px -16px auto -16px; height: 100vh; z-index: -1; flex-direction: column; gap: 24px; padding: 128px 32px 32px;
+    background: rgb(255 255 255 / 0.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    opacity: 0; pointer-events: none; transition: opacity 300ms var(--curve); }
+  .links a { font-size: 30px; line-height: 36px; font-weight: 700; color: var(--text); opacity: 0; transform: translateY(24px); transition: opacity 500ms var(--curve), transform 500ms var(--curve); }
+  .nav.open .links { opacity: 1; pointer-events: auto; }
+  .nav.open .links a { opacity: 1; transform: none; }
+  .nav.open .links a:nth-child(2) { transition-delay: 60ms; }
+  .nav.open .links a:nth-child(3) { transition-delay: 120ms; }
+  .nav.open .links a:nth-child(4) { transition-delay: 180ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .demo, .demo-me, .links a { transform: none !important; }
+  .button:hover, .card:hover { transform: none; }
+}

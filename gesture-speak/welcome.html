@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com https://unpkg.com; font-src https://fonts.gstatic.com https://unpkg.com; img-src 'self' data:">
+<title>Silence: say what you mean without saying a word</title>
+<meta name="description" content="Silence turns a drawing made in the air into a spoken sentence, and the other person's reply into text you can read. For people who cannot speak and the people they talk to.">
+<meta property="og:title" content="Silence: say what you mean without saying a word">
+<meta property="og:description" content="Draw in the air and be heard out loud. Read what the other person answers. A real conversation, both ways.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../shared/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav" aria-label="Main">
+  <a class="brand" href="welcome.html" aria-current="page">Silence</a>
+  <div class="links" id="menu">
+    <a href="#how">How it works</a>
+    <a href="#proof">What we measured</a>
+    <a href="#questions">Questions</a>
+    <a href="how.html">Under the hood</a>
+  </div>
+  <a class="button small" href="./">Open the app</a>
+  <button class="toggle" id="toggle" aria-expanded="false" aria-controls="menu" aria-label="Open the menu"><span></span><span></span></button>
+</nav>
+
+<main id="main">
+<section class="hero">
+  <h1>Say what you mean<br>without saying a word</h1>
+  <p class="sub">Silence turns a drawing made in the air into a spoken sentence, and turns the other person's reply into
+  text you can read. For people who cannot speak and the people they talk to.</p>
+  <a class="button" href="./">Open the app</a>
+  <p class="proofline">Built in one day at VexoHacks with the Vexo band, Deepgram, OpenAI and ElevenLabs.</p>
+
+  <figure class="demo" aria-label="The Silence screen during a conversation">
+    <div class="demo-them"><i class="ph ph-ear" aria-hidden="true"></i> What can I get you?</div>
+    <div class="demo-board">
+      <svg viewBox="0 0 640 300" role="img" aria-label="A cup drawn in the air with one pink line">
+        <path d="M232 92 C236 150 244 196 252 228 C296 236 352 236 392 228 C402 190 408 146 410 94 C352 86 286 84 232 92 M408 118 C462 112 470 178 400 184" fill="none" stroke="#e5446d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M278 62 q10 -14 0 -30 M322 60 q10 -14 0 -30 M366 62 q10 -14 0 -30" fill="none" stroke="#e5446d" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="400" cy="184" r="13" fill="#e5446d" stroke="#101a3a" stroke-width="3"/>
+      </svg>
+      <span class="demo-pen">Fist: drawing</span>
+    </div>
+    <div class="demo-me">I would like a coffee, please.</div>
+  </figure>
+</section>
+
+<section class="tagline" aria-label="What Silence does">
+  <p id="reveal">You draw it. Silence says it. They answer, and you read every word.</p>
+</section>
+
+<section class="block reveal" id="problem">
+  <div class="two">
+    <div>
+      <h2>Typing turns a conversation into waiting</h2>
+      <p>When you cannot speak, the usual answer is a phone. You type, the other person stands there, you show them
+      the screen, and the moment is gone. Short questions become long pauses, and it is easier for both sides to
+      stop talking.</p>
+    </div>
+    <div>
+      <h2>Silence keeps both people in it</h2>
+      <p>Their words appear as they speak them. Your answer is a quick drawing, and it is said out loud as a full
+      sentence a second later. Nobody passes a phone back and forth, and nobody waits.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block reveal" id="benefits">
+  <h2>What you get</h2>
+  <div class="cards">
+    <article class="card">
+      <i class="ph ph-chat-circle-text" aria-hidden="true"></i>
+      <h3>A sentence, not a single word</h3>
+      <p>Draw a cup after someone asks what you would like, and Silence says "I would like a coffee, please."
+      It reads your drawing together with what was just said.</p>
+    </article>
+    <article class="card">
+      <i class="ph ph-closed-captioning" aria-hidden="true"></i>
+      <h3>Their words in large type</h3>
+      <p>What the other person says shows on the screen while they are still talking, about a second behind their
+      voice in our tests.</p>
+    </article>
+    <article class="card">
+      <i class="ph ph-shield-check" aria-hidden="true"></i>
+      <h3>Quiet when it is unsure</h3>
+      <p>A drawing it cannot read is not turned into a guess. In our test a scribble produced no speech at all.
+      Nothing wrong is said in your name.</p>
+    </article>
+    <article class="card">
+      <i class="ph ph-eye-slash" aria-hidden="true"></i>
+      <h3>Your camera stays yours</h3>
+      <p>The camera picture never leaves your laptop and is never shown. Only the lines you draw are used.</p>
+    </article>
+  </div>
+</section>
+
+<section class="block reveal" id="how">
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><span class="num">1</span><i class="ph ph-microphone" aria-hidden="true"></i>
+      <h3>They speak</h3>
+      <p>The microphone in the Vexo band hears the other person, and their words appear on your screen.</p></li>
+    <li><span class="num">2</span><i class="ph ph-hand-fist" aria-hidden="true"></i>
+      <h3>You draw</h3>
+      <p>Make a fist in front of the camera and draw in the air. Open your hand when you are done.</p></li>
+    <li><span class="num">3</span><i class="ph ph-speaker-high" aria-hidden="true"></i>
+      <h3>Silence speaks</h3>
+      <p>The drawing becomes the sentence you mean, and it is said out loud in a natural voice.</p></li>
+  </ol>
+</section>
+
+<section class="block reveal" id="proof">
+  <h2>What we measured</h2>
+  <p class="lead">Silence was built and tested by its makers in one day. These numbers come from our own test runs,
+  not from a study.</p>
+  <div class="stats">
+    <div class="stat"><b>7 of 7</b><span>clear test drawings were given a sentence that fit the conversation</span></div>
+    <div class="stat"><b>0.6 to 1.1 s</b><span>from a finished drawing to its sentence</span></div>
+    <div class="stat"><b>21</b><span>points followed on the hand in every camera frame</span></div>
+    <div class="stat"><b>0</b><span>words spoken for the one unreadable scribble we tried</span></div>
+  </div>
+  <p class="made">Made with <span>Vexo Open band</span><span>Deepgram</span><span>OpenAI</span><span>ElevenLabs</span><span>Google MediaPipe</span></p>
+  <p class="honest">It has not yet been tested with people who rely on it every day. That is the next step.</p>
+</section>
+
+<section class="block reveal" id="questions">
+  <h2>Questions</h2>
+  <div class="faq">
+    <details><summary>Does it understand sign language?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>No. Silence reads drawings made in the air, a few still hand shapes such as a thumbs up, and wrist shakes.
+      It is not a sign language translator.</p></details>
+    <details><summary>What do I need to use it?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>A laptop with a camera, and Chrome or Edge. The Vexo band adds its microphone and wrist shakes. Without the
+      band, the laptop microphone hears the other person.</p></details>
+    <details><summary>Is my camera recorded?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>No. The hand is found inside the page on your own laptop. The picture is never shown, saved or sent
+      anywhere.</p></details>
+    <details><summary>What leaves my laptop?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>The other person's speech goes to Deepgram to become text. Your line drawing and the recent conversation
+      go to OpenAI to become a sentence. The sentence goes to ElevenLabs to become a voice.</p></details>
+    <details><summary>What if it says the wrong thing?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>When a drawing is unclear it says nothing. You can also switch on a step that shows you the sentence first
+      and waits for your yes before it speaks.</p></details>
+    <details><summary>Which languages does it work in?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>English for now, for both the captions and the spoken sentences.</p></details>
+    <details><summary>Do I need an account?<i class="ph ph-plus" aria-hidden="true"></i></summary>
+      <p>No. There is nothing to install and nothing to sign up for. It opens in your browser.</p></details>
+  </div>
+</section>
+
+<section class="final reveal">
+  <h2>Have the next conversation out loud</h2>
+  <p>Nothing to install. No account. Open it in your browser and draw.</p>
+  <a class="button" href="./">Open the app</a>
+</section>
+</main>
+
+<footer>
+  <p>Silence, built at VexoHacks on 14 November 2026.</p>
+  <p><a href="how.html">Under the hood</a><a href="how.html#privacy">What stays private</a><a href="https://github.com/techadnank9/vexo">Source code</a></p>
+</footer>
+<script src="welcome.js" defer></script>
+</body>
+</html>
