@@ -28,6 +28,9 @@ export function captions(on) {
   let keepAlive = 0;
   let lastSent = 0;
   let done = [];                 // finished pieces of the sentence being spoken
+  let sent = 0;                  // sound packets sent on this connection
+  let answered = false;          // Deepgram has sent anything back on this connection
+  let openedAt = 0;
 
   function finish() {
     const sentence = join(done);
@@ -36,6 +39,7 @@ export function captions(on) {
   }
 
   function received(data) {
+    answered = true;
     let message;
     try { message = JSON.parse(data); } catch { return; }
     if (message?.type !== 'Results') return;
@@ -71,12 +75,12 @@ export function captions(on) {
       wanted = true;
       done = [];
       on.state('connecting');
-      let token;
+      let token, scheme;
       try {
         const answer = await cloudFetch('/listen-token', { method: 'POST' });
         if (answer.status === 503) { wanted = false; return on.state('no-key'); }
         if (!answer.ok) throw new Error();
-        token = (await answer.json()).token;
+        ({ token, scheme = 'bearer' } = await answer.json());   // 'bearer': a 30-second token; 'token': the key itself
       } catch {
         wanted = false;
         return on.state('no-token');                  // no server (a static copy of the page), or Deepgram said no
@@ -85,15 +89,20 @@ export function captions(on) {
       try {
         // A browser cannot add a header to a WebSocket, so Deepgram reads the key from the
         // "protocol" field instead. It is never part of the address.
-        socket = new WebSocket(ADDRESS, ['bearer', token]);
+        socket = new WebSocket(ADDRESS, [scheme, token]);
       } catch {
         wanted = false;
         return on.state('failed');
       }
       socket.binaryType = 'arraybuffer';
       socket.onopen = () => {
-        lastSent = Date.now();
+        lastSent = openedAt = Date.now();
+        sent = 0;
+        answered = false;
         keepAlive = setInterval(() => {
+          // Sound has gone out for seconds and not one word, not even "nothing heard", came back:
+          // this connection is deaf. Say so, and the page listens another way instead.
+          if (!answered && sent > 200 && Date.now() - openedAt > 6000) { wanted = false; return close('failed'); }
           if (socket?.readyState === 1 && Date.now() - lastSent >= KEEP_ALIVE_MS) socket.send(JSON.stringify({ type: 'KeepAlive' }));
         }, 1000);
         on.state('on');
@@ -107,6 +116,7 @@ export function captions(on) {
       if (socket?.readyState !== 1) return;
       try {
         socket.send(packet);
+        sent++;
         lastSent = Date.now();
       } catch { /* closing: onclose reports it */ }
     },

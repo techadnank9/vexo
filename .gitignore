@@ -4,3 +4,4 @@ vexo-open-kit
 __pycache__/
 .DS_Store
 /dist/
+data/

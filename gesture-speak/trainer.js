@@ -118,11 +118,18 @@ function warmVoice() {
 }
 
 // ---- the page
+/** Long text gets smaller type, so the space it sits in stays the same size (theme.css reads --fit). */
+function fit(element) {
+  const letters = element.textContent.length;
+  element.style.setProperty('--fit', letters <= 45 ? 1 : letters <= 90 ? 0.78 : letters <= 160 ? 0.62 : 0.5);
+}
 function show(text, detail = '', colour = '', sign = null) {
   $('#status').textContent = text;
   $('#status').style.color = colour;
   $('#board-said').textContent = text;            // shown under the board in full screen
   $('#board-said').style.color = colour;
+  fit($('#board-said'));
+  fit($('#status'));
   $('#detail').textContent = detail;
   $('#now-sign').hidden = sign === null;
   if (sign !== null) $('#now-sign').src = typeof sign === 'number' ? signOf(sign) : sign;     // a table row, or a picture
@@ -217,6 +224,9 @@ function showSpoken() {
   $('#live').textContent = live || (talk.findLast((one) => one.who === 'them')?.text ?? '');
   $('#live').classList.toggle('guess', Boolean(live));
   $('#board-caption').textContent = $('#live').textContent;   // shown over the board in full screen
+  fit($('#live'));
+  fit($('#board-caption'));
+  $('#live').scrollTop = $('#live').scrollHeight;             // the newest words are the ones in view
 }
 function line_(who, text, guess = false) {
   const p = document.createElement('p');
@@ -441,6 +451,7 @@ function showMode() {
   $('#rhythm-card').hidden = modeIs('taught');   // shakes work while drawing too
   $('#taught-card').hidden = !modeIs('taught');
   if (!isDraw() && air.on) air.stop();
+  if (isDraw() && !air.on) air.start();          // drawing needs the camera: ask for it at once, no button to find
   held = null;
   clearTimeout(holdTimer);
   step = 0;
@@ -489,6 +500,13 @@ function drew(result, picture) {
   setTimeout(() => tile.classList.remove('hit'), 1500);
 }
 
+/** The last lines of the conversation, with what the other person is saying right now (not finished yet) at the end. */
+function heardSoFar() {
+  const lines = talk.slice(-8);
+  if (live) lines.push({ who: 'them', text: live });
+  return lines;
+}
+
 /** Ask the AI what the drawing means (OpenAI through /guess). Nothing is said until you confirm. */
 async function askAI(picture) {
   show('Guessing...', 'The AI is looking at your drawing.', '', picture);
@@ -496,7 +514,7 @@ async function askAI(picture) {
   let answer;
   try {
     const reply = await cloudFetch('/guess', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: picture, scene: scene()?.title ?? 'an everyday conversation' }) });
+      body: JSON.stringify({ image: picture, scene: scene()?.title ?? 'an everyday conversation', history: heardSoFar() }) });
     if (reply.status === 503) {
       light(null);
       return show('AI guessing is off', 'It needs OPENAI_API_KEY in the .env file next to server.py (restart the server after). Simple shapes work meanwhile.', '', picture);
@@ -513,6 +531,7 @@ async function askAI(picture) {
     return show('Not sure', `The AI could not tell what you want to say.${what} Draw it again.`, '', picture);
   }
   guessed = { ...answer, picture };
+  if ($('#say-at-once').checked) return sayGuess();     // said straight after the drawing, no yes or no
   $('#guess-text').textContent = `You drew ${answer.drawing}: "${answer.say}"`;
   $('#guess').hidden = false;
   show(`"${answer.say}"?`, `The AI thinks you drew ${answer.drawing}. Say it: draw a check, shake the band slowly, or press Say it. `
@@ -538,6 +557,16 @@ function dropGuess(quietly = false) {
   show('Dropped', 'Nothing was said. Draw again.');
   light(null);
 }
+// Hand signs the camera knows by itself, and what each one says (the phrase can be changed on the page).
+const SIGN_NAMES = {
+  Thumb_Up: { face: '👍', name: 'Thumbs up', phrase: 'Yes' },
+  Thumb_Down: { face: '👎', name: 'Thumbs down', phrase: 'No' },
+  Victory: { face: '✌️', name: 'Two fingers', phrase: 'Thank you' },
+  Pointing_Up: { face: '☝️', name: 'One finger up', phrase: 'Excuse me, one moment please.' },
+  ILoveYou: { face: '🤟', name: 'I love you', phrase: 'I love you' },
+};
+const signPhrase = (name) => $(`#sname-${name}`).value.trim() || SIGN_NAMES[name].phrase;
+let penDown = false;             // the fist is closed and a line is being drawn
 const air = airDrawing({
   video: $('#video'),
   ink: $('#ink'),
@@ -546,8 +575,22 @@ const air = airDrawing({
     $('#camera-state').textContent = CAMERA_STATES[state];
     $('#camera').textContent = state === 'on' || state === 'loading' ? 'Stop camera' : 'Start camera';
   },
+  onSign(name) {
+    const phrase = signPhrase(name);
+    show(phrase, `Hand sign: ${SIGN_NAMES[name].name}.`, '#e5446d');
+    heard(phrase);
+    light('#e5446d');
+    const tile = $(`#sign-${name}`);
+    tile.classList.add('hit');
+    setTimeout(() => tile.classList.remove('hit'), 1500);
+  },
+  onHand(state) {
+    if (penDown) return;
+    $('#pen-state').textContent = state === 'open' ? 'Open hand: not drawing' : state === 'between' ? 'Half open: make a fist to draw' : '';
+  },
   onPen(down) {
-    $('#pen-state').textContent = down ? 'Drawing...' : '';
+    penDown = down;
+    $('#pen-state').textContent = down ? 'Fist: drawing...' : '';
     if (down) light('#e5446d', { pattern: 'breathe', period: 900 });   // pink, breathing: "I am drawing"
   },
 });
@@ -594,7 +637,8 @@ const listener = captions({
   text: caption,
   async state(state) {
     // No key, or no server to ask for one: this computer's microphone instead.
-    if (state === 'no-key' || state === 'no-token') { await mic(false); return computer.start(); }
+    // Deepgram stopped or never answered: the same, so the other person's words never just go missing.
+    if (state === 'no-key' || state === 'no-token' || state === 'failed') { await mic(false); return computer.start(); }
     await captionState(BAND_STATES[state], state === 'on', state !== 'on' && state !== 'connecting');
   },
 });
@@ -617,6 +661,25 @@ async function switchCaptions() {
 // ---- the parts of the page that work without a band
 for (const [key, { title }] of Object.entries(SCENES)) $('#scene').add(new Option(title, key));
 // The shape tiles: a picture, the phrase it says, and Hear it.
+for (const [key, sign] of Object.entries(SIGN_NAMES)) {
+  const tile = document.createElement('div');
+  tile.className = 'shape';
+  tile.id = `sign-${key}`;
+  const face = Object.assign(document.createElement('span'), { className: 'face', textContent: sign.face });
+  const words = document.createElement('div');
+  const title = Object.assign(document.createElement('b'), { textContent: sign.name });
+  const row = document.createElement('p');
+  row.className = 'row';
+  const input = Object.assign(document.createElement('input'), { id: `sname-${key}`, maxLength: 60, value: sign.phrase });
+  input.setAttribute('aria-label', `Phrase for ${sign.name}`);
+  input.onchange = () => fetchSound(signPhrase(key));
+  const hear = Object.assign(document.createElement('button'), { textContent: 'Hear it' });
+  hear.onclick = () => speak(signPhrase(key));
+  row.append(input, hear);
+  words.append(title, row);
+  tile.append(face, words);
+  $('#sign-tiles').append(tile);
+}
 for (const shape of SHAPES) {
   const tile = document.createElement('div');
   tile.className = 'shape';
@@ -680,6 +743,9 @@ setInterval(() => {
   samplesThisSecond = 0;
 }, 1000);
 load();
+// One way of working, nothing to choose: hand signs, drawing in the air and shakes on the band all at once.
+$('#mode').value = 'draw';
+$('#guess-mode').value = 'rest';
 boardSize();
 showBoundary();
 showMode();
@@ -698,8 +764,18 @@ for (let i = 0; i < COMMANDS; i++) {
   $(`#rname-${i}`).onchange = () => { save(); fetchSound(cmdPhrase(i)); showScript(); };
 }
 $('#script-restart').onclick = () => { step = 0; showScript(); };
+// The page shows only the conversation and the board. Everything else (phrases, shakes, scenes) is one button away.
+$('#more').onclick = () => {
+  const open = document.body.classList.toggle('more');
+  $('#more').textContent = open ? 'Fewer options' : 'More options';
+  $('#more').setAttribute('aria-expanded', String(open));
+};
 $('#clear').onclick = () => { talk.length = 0; live = ''; pending = []; clearTimeout(pauseTimer); showSpoken(); };
 $('#captions').onchange = switchCaptions;
+// A conversation goes both ways from the first second: captions are on as soon as the page opens
+// (this computer's microphone until the band is connected, then the band's). ...?captions=0 leaves them off.
+const autoCaptions = new URLSearchParams(location.search).get('captions') !== '0';
+if (autoCaptions) { $('#captions').checked = true; switchCaptions(); }
 $('#ai').onchange = () => { if (!$('#ai').checked) endSentence(); };
 $('#forget').onclick = () => {
   examples = Array.from({ length: GESTURES }, () => []);
@@ -730,6 +806,7 @@ onConnect(async (theBand, pretend) => {
   band.on('reconnected', () => carryOn());
   band.on('disconnect', () => {
     if ($('#captions').checked && !computer.on) listener.stop();   // the computer's microphone goes on without the band
+    if (autoCaptions && !computer.on) { $('#captions').checked = true; computer.start(); }   // keep listening without the band
     micOn = false;
     held = null;
     detector.reset();
@@ -778,5 +855,6 @@ onConnect(async (theBand, pretend) => {
   warmVoice();
   skipped.clear();
   carryOn();
+  // The band is here: its microphone takes over the captions from the computer's.
+  if (autoCaptions) { computer.stop(); $('#captions').checked = true; await switchCaptions(); }
 });
-

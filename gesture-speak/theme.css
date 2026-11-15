@@ -1,0 +1,245 @@
+/* The look of the page. Loaded after style.css and changes no markup: every rule here is
+   about colour, type and where things sit.
+
+   The idea: two people at one table. The left side is the other person's voice, in big
+   words on blue, with the conversation under it; it never scrolls away. The right side is
+   yours: the board you draw on, the shakes, the phrases. Three marker colours carry the
+   meaning everywhere: blue = them, pink = you, yellow = "look here". */
+:root {
+  color-scheme: light;
+  --ink: #101a3a;        /* navy ink: all text */
+  --paper: #edf0f7;      /* the desk */
+  --card: #ffffff;       /* the board */
+  --line: #c9d0e3;
+  --soft: #566087;
+  --them: #2742e0;       /* blue marker: the other person */
+  --me: #e5446d;         /* pink marker: you */
+  --mark: #ffd60a;       /* yellow highlighter: look here */
+  --accent: var(--them);
+  --side: clamp(340px, 40vw, 640px);
+  --their-share: 54vh;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #101a3a; --paper: #edf0f7; --card: #ffffff; --line: #c9d0e3; --soft: #566087; --accent: var(--them); }
+}
+
+body {
+  max-width: none; margin: 0;
+  padding: 22px 32px 56px calc(var(--side) + 32px);
+  font: 500 16px/1.5 "Avenir Next", ui-rounded, system-ui, sans-serif;
+  color: var(--ink); background: var(--paper);
+}
+h1 { margin: 0 0 4px; font-size: 1.65rem; font-weight: 700; letter-spacing: -0.02em; }
+body > p:not([id]) { max-width: 64ch; margin: 0 0 16px; color: var(--soft); }
+b, th { font-weight: 700; }
+.soft { color: var(--soft); }
+
+/* ---- controls */
+button, select, input { font: inherit; color: var(--ink); border: 1.5px solid var(--line); background: var(--card); }
+button { border-radius: 999px; padding: 6px 16px; font-weight: 600; }
+select, input:not([type="checkbox"]):not([type="range"]):not([type="color"]) { border-radius: 10px; padding: 6px 12px; }
+button:hover:not(:disabled) { border-color: var(--ink); }
+#connect { background: var(--ink); border-color: var(--ink); color: #fff; }
+#connect:hover:not(:disabled) { background: var(--them); border-color: var(--them); }
+input[type="checkbox"], input[type="range"] { accent-color: var(--them); }
+:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; box-shadow: 0 0 0 5px var(--ink); border-radius: 6px; }
+#message { margin: 10px 2px 14px; font-weight: 600; }
+
+/* ---- surfaces: white boards on the desk, no outlines, no shadows */
+.card { border: 0; border-radius: 18px; padding: 16px 20px; margin: 0 0 14px; background: var(--card); }
+.pretend-only { border: 1.5px dashed var(--line); background: transparent; }
+.pretend-only button { padding: 3px 12px; font-weight: 500; }
+
+/* ---- their side: what the other person says, always in view */
+#caption-bar {
+  position: fixed; left: 0; top: 0; z-index: 5; width: var(--side); height: var(--their-share);
+  margin: 0; padding: 30px 34px 22px; border-radius: 0; box-shadow: none;
+  display: flex; flex-direction: column; gap: 14px;
+  background: var(--them); color: #fff;
+}
+#caption-bar p.row { order: 2; margin: 0; gap: 4px 12px; font-size: 0.95rem; color: rgb(255 255 255 / 0.9); }
+#caption-bar b { color: #fff; }
+#caption-bar .soft { color: rgb(255 255 255 / 0.78); }
+#captions { accent-color: var(--mark); width: 1.05em; height: 1.05em; vertical-align: -2px; }
+#captions-state.warn { color: var(--mark); }
+#live {
+  order: 1; flex: 1; min-height: 0; overflow-y: auto; margin: 0;
+  font-size: clamp(2rem, 3.4vw, 3.6rem); font-weight: 700; line-height: 1.12; letter-spacing: -0.015em; text-wrap: balance;
+}
+#live:empty::before { opacity: 0.55; font-weight: 600; }
+
+/* ---- the conversation, under their side */
+#conversation {
+  position: fixed; left: 0; top: var(--their-share); bottom: 0; z-index: 5; width: var(--side);
+  margin: 0; padding: 16px 26px 20px; border-radius: 0; border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+}
+#conversation > p.row { margin: 0 0 10px; }
+#conversation #clear { margin-left: auto; padding: 3px 14px; }
+.talk { flex: 1; min-height: 0; max-height: none; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.talk p { margin: 0; max-width: 86%; padding: 9px 15px; border-radius: 18px; font-size: 1.06rem; line-height: 1.35; color: var(--soft); }
+.talk p b { display: block; font-size: 0.74em; font-weight: 600; opacity: 0.8; }
+.talk p.me { margin-left: auto; border-bottom-right-radius: 5px; background: var(--me); color: #fff; }
+.talk p.them { border-bottom-left-radius: 5px; background: color-mix(in srgb, var(--them) 13%, #fff); color: var(--ink); }
+
+/* ---- your side: the board */
+#draw-card > p.row:first-child b, #rhythm-card > p.row:first-child b, #conversation > p.row b { font-size: 1.12rem; }
+#stage { border: 3px solid var(--ink); border-radius: 22px; }
+#pen-state { top: 12px; left: 12px; padding: 3px 14px; border-radius: 999px; background: var(--me); font-weight: 600; }
+#guess { border: 0; border-radius: 14px; padding: 10px 16px; background: var(--mark); color: var(--ink); }
+#guess .soft { color: var(--ink); opacity: 0.75; }
+.shapes { gap: 10px; }
+.shape { border: 0; border-radius: 14px; padding: 8px 12px; background: var(--paper); }
+.shape.hit { background: color-mix(in srgb, var(--me) 22%, #fff); }
+#board:fullscreen, #board.full { background: var(--paper); }
+#board:fullscreen #board-caption, #board.full #board-caption { color: var(--them); }
+#board:fullscreen #board-said, #board.full #board-said { color: var(--me); }
+
+/* ---- your side: the shakes */
+#meter { height: 3em; border-radius: 999px; }
+#meter-slow { background: var(--them); padding-left: 18px; }
+#meter-fast { background: #ff8a1f; padding-right: 18px; }
+#needle { width: 8px; margin-left: -4px; background: var(--ink); border-color: #fff; }
+.tiles { gap: 10px; }
+.tile { border: 0; border-radius: 14px; padding: 10px 14px 10px 20px; background: var(--paper); box-shadow: inset 6px 0 0 var(--line); }
+.tile.slow { box-shadow: inset 6px 0 0 var(--them); }
+.tile.fast { box-shadow: inset 6px 0 0 #ff8a1f; }
+.tile.hit { background: color-mix(in srgb, var(--mark) 45%, #fff); }
+img.sign { border: 0; border-radius: 12px; }
+.tile p, .card p { margin: 4px 0 8px; }
+
+/* ---- your side: gestures you teach, a tile each */
+#taught-card table { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+#taught-card tbody { display: contents; }
+#taught-card tr:first-child { display: none; }
+#taught-card tr { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "pic pic" "name name" "colour count" "redo hear";
+  gap: 5px 6px; align-items: center; padding: 8px; border-radius: 14px; background: var(--paper); }
+#taught-card td { padding: 0; }
+#taught-card td:nth-child(1) { grid-area: name; }
+#taught-card td:nth-child(2) { grid-area: pic; }
+#taught-card td:nth-child(3) { grid-area: colour; }
+#taught-card td:nth-child(4) { grid-area: redo; }
+#taught-card td:nth-child(5) { grid-area: count; text-align: right; font-size: 0.9rem; white-space: nowrap; }
+#taught-card td:nth-child(6) { grid-area: hear; text-align: right; }
+#taught-card table img.sign { width: 100%; height: auto; aspect-ratio: 4 / 3; }
+#taught-card td input:not([type="color"]) { width: 100%; min-width: 0; padding: 4px 10px; font-weight: 600; }
+#taught-card td button { padding: 3px 12px; }
+#taught-card input[type="color"] { width: 2.6em; height: 1.9em; padding: 2px; border-radius: 8px; }
+
+/* ---- what you just said, and the demo script */
+.big { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+canvas#picture { border-radius: 14px; background: var(--ink); }
+#script li { border-radius: 12px; }
+#script li.now { background: color-mix(in srgb, var(--mark) 40%, #fff); outline: 0; }
+#script li .you { color: var(--me); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---- a narrow window or a phone: one column, their words stay pinned on top */
+@media (max-width: 980px) {
+  body { padding: 0 16px 40px; }
+  h1 { margin-top: 14px; }
+  #caption-bar { position: sticky; top: 0; width: auto; height: auto; min-height: 9.5rem; margin: 0 -16px 14px; padding: 18px 20px 14px; }
+  #live { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+  #conversation { position: static; width: auto; margin: 0 0 14px; border-radius: 18px; border-right: 0; }
+  .talk { max-height: 15em; }
+}
+
+/* ---- order on your side: connect, how to recognise, what you just said, then the tools.
+   (The page lists "what you just said" last; here it sits where the eye already is.) */
+body { display: flex; flex-direction: column; }
+body > * { order: 20; }
+body > h1 { order: 1; }
+body > p:not([id]) { order: 2; }
+body > .card:has(#connect) { order: 3; }
+#needs-server { order: 4; }
+#message { order: 5; }
+.pretend-only { order: 6; }
+body > .card:has(#mode) { order: 7; }
+body > .card:has(#status) { order: 8; }
+#draw-card { order: 9; }
+#rhythm-card { order: 10; }
+#taught-card { order: 11; }
+#script-card { order: 12; }
+body > .card:has(#status) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 2px 20px; align-items: center; padding: 14px 20px; }
+body > .card:has(#status) > p.row { grid-column: 1; margin: 0; }
+#detail { grid-column: 1; margin: 0; }
+canvas#picture { grid-column: 2; grid-row: 1 / span 2; height: 84px; }
+body > .card:has(#status) > p.soft:last-child { display: none; }
+#now-sign { width: 84px; height: 63px; }
+@media (max-width: 980px) {
+  body > .card:has(#status) { grid-template-columns: 1fr; }
+  canvas#picture { grid-column: 1; grid-row: auto; }
+}
+@media (max-width: 980px) {
+  #caption-bar { order: 0; }
+  #conversation { order: 6; }
+}
+
+/* ---- one way of working: nothing to choose between. Hand signs, drawing and shakes are all on. */
+label:has(> #mode), label:has(> #guess-mode), #link, #taught-card { display: none !important; }
+.shape .face { flex: none; width: 64px; text-align: center; font-size: 2.6rem; line-height: 1; }
+
+/* ---- just the conversation: their words, what was said, and the board to answer on.
+   Everything else is still there and still works; "More options" shows it. */
+#more { margin-left: auto; }
+body:not(.more) > .card:has(#scene),
+body:not(.more) > #rhythm-card,
+body:not(.more) > #script-card,
+body:not(.more) #draw-card > p.soft,
+body:not(.more) #draw-card > p.row:not(:first-child),
+body:not(.more) #sign-tiles,
+body:not(.more) #shape-tiles,
+body:not(.more) canvas#picture { display: none; }
+body:not(.more) > .card:has(#status) { display: block; }
+body:not(.more) #board { width: 100%; }
+body:not(.more) #draw-card > p.row:first-child { margin: 0 0 6px; }
+body:not(.more) #stage { margin: 4px 0 0; max-height: max(260px, calc(100vh - 620px)); }
+body:not(.more) { padding-bottom: 20px; }
+body:not(.more) > p:not([id]) { margin-bottom: 12px; }
+
+/* Full screen stays in view: it is how the board is shown to the other person. */
+body:not(.more) #draw-card > p.row:has(#board-full) { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+body:not(.more) label:has(> #board-size) { display: none; }
+#board-full { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* ---- full screen: the whole screen is the conversation. Their words in a blue band on top,
+   the board filling everything between, your sentence in pink underneath. */
+#stage canvas { background: transparent; border-radius: 0; }
+#board:fullscreen, #board.full { padding: 0; gap: 0; background: var(--paper); }
+#board:fullscreen #board-caption, #board.full #board-caption {
+  flex: none; margin: 0; padding: 22px 230px 20px 36px; min-height: 2.4em;
+  background: var(--them); color: #fff;
+  font-size: clamp(2rem, 3.6vw, 3.8rem); font-weight: 700; line-height: 1.12; letter-spacing: -0.015em; text-wrap: balance;
+}
+#board:fullscreen #board-caption:empty::before, #board.full #board-caption:empty::before { opacity: 0.6; font-weight: 600; }
+#board:fullscreen #stage, #board.full #stage {
+  flex: 1 1 auto; width: auto; min-height: 0; max-height: none; margin: 18px 22px 0; border-radius: 26px;
+}
+#board:fullscreen #board-said, #board.full #board-said {
+  flex: none; margin: 0; padding: 12px 36px 18px; min-height: 2.1em;
+  color: var(--me); text-align: right;
+  font-size: clamp(1.8rem, 3vw, 3.2rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.015em;
+}
+#board:fullscreen #board-said:empty::before, #board.full #board-said:empty::before { content: 'Draw with your fist. What you mean is said here.'; opacity: 0.45; font-weight: 600; }
+#board:fullscreen #board-exit, #board.full #board-exit {
+  top: 20px; right: 24px; padding: 8px 18px; background: #fff; border-color: #fff; color: var(--ink);
+}
+#board:fullscreen #guess, #board.full #guess { margin: 10px 22px 0; }
+
+/* ---- text never pushes the board around. The spaces for words are a fixed size; when a
+   sentence gets long the type gets smaller (--fit, set by the page), and if it is longer
+   still, the newest words stay in view and the oldest slide out of the top. */
+#live { font-size: calc(clamp(2rem, 3.4vw, 3.6rem) * var(--fit, 1)); }
+.big { font-size: calc(2.5rem * var(--fit, 1)); }
+#board:fullscreen #board-caption, #board.full #board-caption {
+  height: clamp(120px, 19vh, 210px); min-height: 0; padding-top: 14px; padding-bottom: 14px;
+  display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;
+  font-size: calc(clamp(2rem, 3.6vw, 3.8rem) * var(--fit, 1));
+}
+#board:fullscreen #board-caption:empty, #board.full #board-caption:empty { justify-content: center; }
+#board:fullscreen #board-said, #board.full #board-said {
+  height: clamp(76px, 11vh, 130px); min-height: 0; padding-top: 8px; padding-bottom: 12px;
+  display: flex; flex-direction: column; justify-content: center; overflow: hidden;
+  font-size: calc(clamp(1.8rem, 3vw, 3.2rem) * var(--fit, 1));
+}

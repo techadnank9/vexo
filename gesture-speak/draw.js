@@ -10,6 +10,17 @@ import { recognise } from './shapes.js';
 
 const VISION = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
 const MODEL = 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task';
+// Fist or open hand, measured on the finger joints themselves (not only the model's label):
+// how far each fingertip reaches from the wrist, compared with its own knuckle. A straight
+// finger reaches about 1.8 times as far as the knuckle, a finger curled into a fist under 1.
+const CURLED = 1.2;              // a fingertip reaching less than this is curled
+const STRAIGHT = 1.5;            // one reaching more than this is straight
+const OPEN_FRAMES = 2;           // the hand seen open this many frames in a row: the pen lifts at once
+// Hand signs: a hand shape held still says its phrase, no drawing needed. These are the
+// shapes Google's model names by itself (a fist draws and an open hand stops, so they are not signs).
+export const SIGNS = ['Thumb_Up', 'Thumb_Down', 'Victory', 'Pointing_Up', 'ILoveYou'];
+const SIGN_FRAMES = 10;          // the same sign this many frames in a row (about a third of a second): it counts
+const SIGN_GONE = 6;             // frames without it before the same sign can be said again
 const LIFT_FRAMES = 3;           // frames without a fist before the pen lifts (a blur can hide the fist for a frame)
 const DONE_MS = 450;             // the hand open this long: the drawing is finished
 const MIN_SIZE = 0.12;           // a drawing smaller than this part of the picture is a twitch, not a shape
@@ -31,10 +42,12 @@ const BUSY_MS = 800;             // after the pen lifts, this long still counts 
  * @param {(state: string) => void} page.onState    'loading' | 'on' | 'off' | 'no-model' | 'denied' | 'no-camera'
  * @param {(pen: boolean) => void} [page.onPen]
  */
-export function airDrawing({ video, ink, onShape, onState, onPen = () => {} }) {
+export function airDrawing({ video, ink, onShape, onState, onPen = () => {}, onHand = () => {}, onSign = () => {} }) {
   let strokes = [];              // [[{x, y}]] from 0 to 1 across the picture
   let pen = false;
   let noFist = 0;                // frames in a row without a fist
+  let openFrames = 0;            // frames in a row with the hand clearly open
+  let sign = null, signFrames = 0, signGone = 0, signSaid = null;   // the hand sign being held
   let openSince = 0;             // when the pen was last lifted (ms)
   let hand = null;               // where the hand is now, for the marker: { x, y, fist }
   let smooth = null;
@@ -67,7 +80,7 @@ export function airDrawing({ video, ink, onShape, onState, onPen = () => {} }) {
     if (hand) {
       pen2d.beginPath();
       pen2d.arc(hand.x * width, hand.y * height, (hand.fist ? 14 : 10) * unit, 0, 2 * Math.PI);
-      pen2d.fillStyle = hand.fist ? '#e5446d' : '#c8cdd6';
+      pen2d.fillStyle = hand.fist ? '#e5446d' : hand.open ? '#34c759' : '#c8cdd6';   // pink: drawing; green: open, stopped; grey: half open
       pen2d.fill();
       pen2d.lineWidth = 3 * unit;
       pen2d.strokeStyle = '#1c2330';
@@ -126,13 +139,15 @@ export function airDrawing({ video, ink, onShape, onState, onPen = () => {} }) {
     if (found) {
       const raw = { x: found.x, y: found.y };
       smooth = smooth ? { x: smooth.x + SMOOTH * (raw.x - smooth.x), y: smooth.y + SMOOTH * (raw.y - smooth.y) } : raw;
-      hand = { ...smooth, fist: found.fist };
+      hand = { ...smooth, fist: found.fist, open: found.open };
     } else {
       hand = null;
       smooth = null;
     }
     const now = performance.now();
     const bandMoving = bandOn && now - bandMovedAt < BAND_MOVING_MS;
+    openFrames = found?.open ? openFrames + 1 : 0;
+    onHand(found ? (found.fist ? 'closed' : found.open ? 'open' : 'between') : 'none');
     if (found?.fist) {
       noFist = 0;
       if (waitOpen && !bandMoving) return paint();  // still holding the fist after finishing
@@ -148,10 +163,48 @@ export function airDrawing({ video, ink, onShape, onState, onPen = () => {} }) {
       noFist++;
       waitOpen = false;
       // No fist in the picture. If the band still feels the wrist moving, it is a blur: keep the pen down.
-      if (pen && noFist >= LIFT_FRAMES && !bandMoving) up();
+      // A clearly open hand lifts the pen at once, whatever the band feels.
+      if (pen && (openFrames >= OPEN_FRAMES || (noFist >= LIFT_FRAMES && !bandMoving))) up();
       if (!pen && !done && strokes.length && performance.now() - openSince > DONE_MS) finish();
     }
     paint();
+  }
+  /** 'closed' (a fist: draw), 'open' (stop) or 'between', from the finger joints and the model's label. */
+  function grip(result) {
+    const marks = result.worldLandmarks?.[0] ?? result.landmarks[0];      // world: real sizes, whatever way the hand faces
+    const wide = result.worldLandmarks?.[0] ? 1 : (video.videoWidth || 4) / (video.videoHeight || 3);
+    const far = (a, b) => Math.hypot((marks[a].x - marks[b].x) * wide, marks[a].y - marks[b].y, (marks[a].z ?? 0) - (marks[b].z ?? 0));
+    let curled = 0, straight = 0;
+    for (const [tip, knuckle] of [[8, 5], [12, 9], [16, 13], [20, 17]]) {   // index, middle, ring, little finger
+      const reach = far(tip, 0) / (far(knuckle, 0) || 1);
+      if (reach < CURLED) curled++;
+      else if (reach > STRAIGHT) straight++;
+    }
+    const label = result.gestures?.[0]?.[0];
+    const says = (name) => label?.categoryName === name && label.score > 0.6;
+    if ((curled >= 3 && straight === 0) || (says('Closed_Fist') && straight <= 1)) return 'closed';
+    if (straight >= 3 || (says('Open_Palm') && curled <= 1)) return 'open';
+    return 'between';
+  }
+  /** The hand sign in this frame (one of SIGNS), or null. Never while a line is being drawn. */
+  function signOf(result) {
+    const label = result.gestures?.[0]?.[0];
+    if (!label || label.score < 0.6 || !SIGNS.includes(label.categoryName)) return null;
+    if (pen && sizeOf(strokes.flat()) >= MIN_SIZE / 2) return null;      // drawing: a fist with the thumb out is still a fist
+    return label.categoryName;
+  }
+  /** Count how long a sign has been held; say it once, and again only after the hand has let go. */
+  function held(shown) {
+    if (shown && shown === sign) signFrames++;
+    else { sign = shown; signFrames = shown ? 1 : 0; }
+    if (!shown) { if (++signGone >= SIGN_GONE) signSaid = null; return; }
+    signGone = 0;
+    if (signFrames === SIGN_FRAMES && shown !== signSaid) {
+      signSaid = shown;
+      if (pen) { strokes.pop(); up(); }            // the dot the fist left before the thumb came out
+      if (!strokes.length || done) { strokes = []; paint(); }
+      onSign(shown);
+    }
   }
   function loop() {
     if (!running) return;
@@ -164,8 +217,11 @@ export function airDrawing({ video, ink, onShape, onState, onPen = () => {} }) {
         const palm = [0, 5, 9, 13, 17].map((i) => marks[i]);
         const x = 1 - palm.reduce((a, m) => a + m.x, 0) / palm.length;
         const y = palm.reduce((a, m) => a + m.y, 0) / palm.length;
-        frame({ x, y, fist: result.gestures?.[0]?.[0]?.categoryName === 'Closed_Fist' });
-      } else frame(null);
+        const shown = signOf(result);
+        const state = shown ? 'between' : grip(result);      // a hand sign is neither a fist nor an open hand
+        held(shown);
+        frame({ x, y, fist: state === 'closed', open: state === 'open' });
+      } else { held(null); frame(null); }
     }
     requestAnimationFrame(loop);
   }

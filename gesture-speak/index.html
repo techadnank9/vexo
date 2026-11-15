@@ -8,6 +8,7 @@
 <link rel="icon" href="../shared/icon.png">
 <link rel="stylesheet" href="../shared/style.css">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <h1>Gesture to speech</h1>
@@ -20,9 +21,9 @@
     <span id="captions-state" class="soft">Captions off.</span></p>
   <p id="live" aria-live="polite"></p>
 </div>
-<p>For a deaf person talking with someone who can hear. Shake your wrist and the page says a phrase out loud;
-switch on live captions and what the other person says is written on the screen. Nothing to teach: a slow or a fast
-shake, once or twice, is all it needs. (Prefer your own gestures? Choose "Gestures you teach".)</p>
+<p>For a person who cannot speak, talking with someone who can hear. Show a hand sign, draw in the air with your
+fist, or shake the band: the page turns it into a sentence and says it out loud. What the other person answers is
+written on the screen, so the conversation keeps going both ways. <a href="how.html">How it works</a></p>
 <div class="card row">
   <label>Band number <input id="number" inputmode="numeric" maxlength="13" placeholder="XX" value="35"></label>
   <select id="link" aria-label="How to connect">
@@ -32,6 +33,7 @@ shake, once or twice, is all it needs. (Prefer your own gestures? Choose "Gestur
   </select>
   <button id="connect">Connect</button>
   <button id="disconnect" disabled>Disconnect</button>
+  <button id="more" aria-expanded="false">More options</button>
 </div>
 <p id="needs-server"><b>Connect does nothing?</b> Open this page through the web server:
 <code>http://localhost:3000/gesture-speak/</code> in Chrome or Edge.</p>
@@ -70,14 +72,16 @@ shake, once or twice, is all it needs. (Prefer your own gestures? Choose "Gestur
 <div class="card" id="draw-card" hidden>
   <p class="row"><b>Draw in the air</b> <button id="camera">Start camera</button>
     <span id="camera-state" class="soft">Camera off.</span></p>
-  <p class="soft">Make a <b>fist</b> to start drawing, move it to draw, <b>open your hand</b> when it is done (with the band on,
-    holding the fist still works too). A simple shape says its phrase at once; anything else, the AI guesses, and you
-    confirm before it is said. No camera? Draw on the board with the mouse or a finger. The board shows only your lines and a dot for your hand: the camera picture is never shown, and it stays on this computer.</p>
+  <p class="soft">Hold up a <b>hand sign</b> and it is said. Make a <b>fist</b> to draw, move it, and <b>open your hand</b>
+    when the drawing is done: it becomes a sentence that answers what the other person just said, and is spoken at once.
+    A shake on the band works at any time. No camera? Draw on the board with the mouse or a finger. The board shows only
+    your lines and a dot for your hand: the camera picture is never shown, and it stays on this computer.</p>
   <p class="row"><label>What a drawing means <select id="guess-mode">
     <option value="rest">Simple shapes; the AI guesses anything else</option>
     <option value="all">The AI guesses every drawing</option>
     <option value="off">Simple shapes only</option>
-  </select></label></p>
+  </select></label>
+  <label><input id="say-at-once" type="checkbox" checked> Say the AI's guess at once (no yes or no first)</label></p>
   <p class="row"><label>Board size <input id="board-size" type="range" min="40" max="100" step="5" value="70"></label>
     <button id="board-full">Full screen</button></p>
   <div id="board">
@@ -89,6 +93,9 @@ shake, once or twice, is all it needs. (Prefer your own gestures? Choose "Gestur
     <div id="guess" class="row" hidden><b id="guess-text"></b> <button id="guess-yes">Say it</button> <button id="guess-no">No</button>
       <span class="soft">or: draw a check / shake slowly to say it, draw a line / shake fast to drop it</span></div>
   </div>
+  <p class="row"><b>Hand signs</b> <span class="soft">Hold one up to the camera for a moment.</span></p>
+  <div class="shapes" id="sign-tiles"></div>
+  <p class="row"><b>Shapes</b> <span class="soft">Draw one with your fist. Anything else you draw becomes a sentence too.</span></p>
   <div class="shapes" id="shape-tiles"></div>
 </div>
 <div class="card" id="rhythm-card">
